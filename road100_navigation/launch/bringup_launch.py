@@ -29,7 +29,7 @@ from nav2_common.launch import RewrittenYaml
 
 def generate_launch_description():
     # Get the launch directory
-    bringup_dir = get_package_share_directory('bcr_bot_navigation')
+    bringup_dir = get_package_share_directory('road100_navigation')
     launch_dir = os.path.join(bringup_dir, 'launch')
 
     # Create the launch configuration variables
@@ -45,7 +45,7 @@ def generate_launch_description():
     log_level = LaunchConfiguration('log_level')
     rviz_config_file = LaunchConfiguration('rviz_config_file')
 
-    map_file = 'warehouse.yaml'
+    map_file = 'lab_map.yaml'
     params_yaml_file = 'nav2_params.yaml'
 
     # Map fully qualified names to relative ones so the node's namespace can be prepended.
