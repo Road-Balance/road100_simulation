@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 import os
 
 from pathlib import Path
@@ -23,8 +22,10 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.actions import IncludeLaunchDescription, SetEnvironmentVariable
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch.substitutions import Command, FindExecutable, LaunchConfiguration, PathJoinSubstitution
+
 from launch_ros.actions import Node
+from launch_ros.substitutions import FindPackageShare
 
 import xacro
 
@@ -45,10 +46,7 @@ def generate_launch_description():
         ]
     )
 
-    world_path = os.path.join(pkg_path, 'worlds', 'lab.sdf')
-
     # Gazebo Sim
-    # maze.sdf, lab.sdf
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py')
@@ -56,27 +54,65 @@ def generate_launch_description():
         launch_arguments={'gz_args': f'-r lab.sdf'}.items(),
     )
 
-    # Gz - ROS Bridge
-    bridge = Node(
-        package='ros_gz_bridge',
-        executable='parameter_bridge',
+    # Get URDF via xacro
+    rsp_launcher = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(pkg_path, 'launch', 'robot_state_publisher.launch.py')
+        ),
+    )
+
+
+    gz_spawn_entity = Node(
+        package="ros_gz_sim",
+        executable="create",
         arguments=[
-            # Clock (IGN -> ROS2)
-            '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock',
-            # Joint states (IGN -> ROS2)
-            # '/world/empty/model/rrbot/joint_state@sensor_msgs/msg/JointState@gz.msgs.Model',
+            "-topic", "/robot_description",
+            "-name", "road100",
+            "-allow_renaming", "true",
+            "-x", "0.0",
+            "-y", "0.0",
+            "-z", "0.1",
+            "-Y", "0.0",
+        ]
+    )
+
+    # Gz - ROS Bridge
+    gz_ros2_bridge = Node(
+        package="ros_gz_bridge",
+        executable="parameter_bridge",
+        arguments=[
+            "/cmd_vel@geometry_msgs/msg/Twist@gz.msgs.Twist",
+            "/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock",
+            "/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry",
+            "/tf@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V",
+            "/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan",
+            # "/kinect_camera@sensor_msgs/msg/Image[gz.msgs.Image",
+            # "/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo",
+            # "/kinect_camera/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked",
+            "/imu@sensor_msgs/msg/Imu[gz.msgs.IMU",
+            "/world/default/model/road100/joint_state@sensor_msgs/msg/JointState[gz.msgs.Model"
         ],
-        # remappings=[
-        #     ('/world/empty/model/rrbot/joint_state', 'joint_states'),
-        # ],
+        remappings=[
+            ('/world/default/model/road100/joint_state', 'road100/joint_states'),
+            # ('/imu', 'bcr_bot/imu'),
+            # ('/camera_info', 'bcr_bot/camera_info'),
+        ]
+    )
+
+    # rqt robot steering
+    rqt_robot_steering = Node(
+        package='rqt_robot_steering',
+        executable='rqt_robot_steering',
+        name='rqt_robot_steering',
         output='screen'
     )
 
-    return LaunchDescription(
-        [
-            # Nodes and Launches
-            ign_resource_path,
-            gazebo,
-            bridge,
-        ]
-    )
+    return LaunchDescription([
+        # Nodes and Launches
+        ign_resource_path,
+        gazebo,
+        rsp_launcher,
+        gz_spawn_entity,
+        gz_ros2_bridge,
+        rqt_robot_steering,
+    ])
