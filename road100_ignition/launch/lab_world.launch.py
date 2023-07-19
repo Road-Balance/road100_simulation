@@ -23,6 +23,7 @@ from launch.actions import DeclareLaunchArgument
 from launch.actions import IncludeLaunchDescription, SetEnvironmentVariable
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import Command, FindExecutable, LaunchConfiguration, PathJoinSubstitution
+from launch.conditions import IfCondition, UnlessCondition
 
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
@@ -36,6 +37,15 @@ def generate_launch_description():
     pkg_ros_gz_sim_demos = get_package_share_directory('ros_gz_sim_demos')
     
     pkg_path = get_package_share_directory('road100_ignition')
+    rviz_config_file = os.path.join(pkg_path, 'rviz', 'ignition.rviz')
+
+    # launch configuration
+    use_rviz = LaunchConfiguration('use_rviz')
+
+    declare_use_rviz = DeclareLaunchArgument(
+        name='use_rviz',
+        default_value='True',
+        description='Whether to start RVIZ')
 
     # Set ignition resource path
     ign_resource_path = SetEnvironmentVariable(
@@ -61,7 +71,6 @@ def generate_launch_description():
         ),
     )
 
-
     gz_spawn_entity = Node(
         package="ros_gz_sim",
         executable="create",
@@ -86,16 +95,13 @@ def generate_launch_description():
             "/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry",
             "/tf@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V",
             "/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan",
-            # "/kinect_camera@sensor_msgs/msg/Image[gz.msgs.Image",
-            # "/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo",
-            # "/kinect_camera/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked",
+            "/camera@sensor_msgs/msg/Image[gz.msgs.Image",
+            "/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo",
             "/imu@sensor_msgs/msg/Imu[gz.msgs.IMU",
             "/world/default/model/road100/joint_state@sensor_msgs/msg/JointState[gz.msgs.Model"
         ],
         remappings=[
             ('/world/default/model/road100/joint_state', 'road100/joint_states'),
-            # ('/imu', 'bcr_bot/imu'),
-            # ('/camera_info', 'bcr_bot/camera_info'),
         ]
     )
 
@@ -107,7 +113,20 @@ def generate_launch_description():
         output='screen'
     )
 
+    # Launch RViz
+    rviz = Node(
+        condition=IfCondition(use_rviz),
+        package='rviz2',
+        executable='rviz2',
+        name='rviz2',
+        output='screen',
+        arguments=['-d', rviz_config_file]
+    )
+
     return LaunchDescription([
+        # Launch Configuration 
+        declare_use_rviz,
+
         # Nodes and Launches
         ign_resource_path,
         gazebo,
@@ -115,4 +134,5 @@ def generate_launch_description():
         gz_spawn_entity,
         gz_ros2_bridge,
         rqt_robot_steering,
+        rviz,
     ])
