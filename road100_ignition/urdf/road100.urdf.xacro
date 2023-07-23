@@ -8,34 +8,64 @@
 
   <xacro:if value="$(arg use_rgbd)">
   	<xacro:include filename="$(find road100_ignition)/urdf/gz_rgbd.xacro"/>
+    <link name="base_link">
+      <inertial>
+        <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
+        <mass value="5.0"/>
+        <inertia ixx="1.0577083333333335" iyy="1.5268854166666668" izz="2.010510416666667" ixy="0.0" iyz="0.0" ixz="0.0"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="file://$(find road100_description)/meshes/base_link_rgbd_.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="dark_grey"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="file://$(find road100_description)/meshes/base_link_rgbd_.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+    </link>
+    <joint name="camera_joint" type="fixed">
+      <origin xyz="0.10025 0 0.0325" rpy="0 0 0"/>
+      <parent link="base_link"/>
+      <child link="camera_link"/>
+    </joint>
   </xacro:if>
 
   <xacro:if value="$(arg use_lidar)">
   	<xacro:include filename="$(find road100_ignition)/urdf/gz_lidar.xacro"/>
+    <link name="base_link">
+      <inertial>
+        <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
+        <mass value="5.0"/>
+        <inertia ixx="1.0577083333333335" iyy="1.5268854166666668" izz="2.010510416666667" ixy="0.0" iyz="0.0" ixz="0.0"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="file://$(find road100_description)/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="dark_grey"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="file://$(find road100_description)/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+    </link>
+    <joint name="camera_joint" type="fixed">
+      <origin xyz="0.08 0 0.045" rpy="0 0 0"/>
+      <parent link="base_link"/>
+      <child link="camera_link"/>
+    </joint>
   </xacro:if>
 
   <link name="base_footprint" />
 
-  <link name="base_link">
-    <inertial>
-      <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
-      <mass value="5.0"/>
-      <inertia ixx="1.0577083333333335" iyy="1.5268854166666668" izz="2.010510416666667" ixy="0.0" iyz="0.0" ixz="0.0"/>
-    </inertial>
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-        <mesh filename="file://$(find road100_description)/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
-      </geometry>
-      <material name="dark_grey"/>
-    </visual>
-    <collision>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-        <mesh filename="file://$(find road100_description)/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
-      </geometry>
-    </collision>
-  </link>
   <joint name="base_footprint_joint" type="fixed">
     <parent link="base_footprint"/>
     <child link="base_link"/>
@@ -188,11 +218,6 @@
       </geometry>
     </collision>
   </link>
-  <joint name="camera_joint" type="fixed">
-    <origin xyz="0.08 0 0.045" rpy="0 0 0"/>
-    <parent link="base_link"/>
-    <child link="camera_link"/>
-  </joint>
 
 	<link name="camera_optical"/>
 	<joint name="camera_optical_joint" type="fixed">
