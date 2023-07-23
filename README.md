@@ -21,5 +21,7 @@ ros2 launch road100_slam slam_toolbox.launch.py
 * Navigation
 ```
 ros2 launch road100_ignition lab_world.launch.py use_rviz:=false
+ros2 launch road100_ignition maze_world.launch.py use_rviz:=false
 
+ros2 launch road100_navigation bringup_launch.py use_rviz:=false
 ```
