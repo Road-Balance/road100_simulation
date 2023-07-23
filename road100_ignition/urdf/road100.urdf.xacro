@@ -1,8 +1,18 @@
 <?xml version="1.0" ?>
 <robot name="road100" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
+  <xacro:arg name="use_rgbd"  default="false" />
+  <xacro:arg name="use_lidar" default="false" />
+
   <xacro:include filename="$(find road100_ignition)/urdf/materials.xacro"/>
-	<xacro:include filename="$(find road100_ignition)/urdf/gz.xacro"/>
+
+  <xacro:if value="$(arg use_rgbd)">
+  	<xacro:include filename="$(find road100_ignition)/urdf/gz_rgbd.xacro"/>
+  </xacro:if>
+
+  <xacro:if value="$(arg use_lidar)">
+  	<xacro:include filename="$(find road100_ignition)/urdf/gz_lidar.xacro"/>
+  </xacro:if>
 
   <link name="base_footprint" />
 
@@ -183,5 +193,12 @@
     <parent link="base_link"/>
     <child link="camera_link"/>
   </joint>
+
+	<link name="camera_optical"/>
+	<joint name="camera_optical_joint" type="fixed">
+		<origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+		<parent link="camera_link"/>
+		<child link="camera_optical"/>
+	</joint>
 
 </robot>

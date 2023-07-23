@@ -35,6 +35,17 @@ def generate_launch_description():
     pkg_path = get_package_share_directory('road100_ignition')
     xacro_path = os.path.join(pkg_path, "urdf", "road100.urdf.xacro")
 
+    use_rgbd = True
+
+    if use_rgbd:
+        robot_description = {'robot_description': Command([
+                    'xacro ', xacro_path,
+                    ' use_rgbd:=', "true"])}
+    else:
+        robot_description = {'robot_description': Command([
+                    'xacro ', xacro_path,
+                    ' use_lidar:=', "true"])}
+
     # Launch Robot State Publisher
     robot_state_publisher = Node(
         package='robot_state_publisher',
@@ -43,28 +54,25 @@ def generate_launch_description():
         parameters=[
             {"use_sim_time": True},
             #'frame_prefix': f"{namespace}/", # Reimplemented https://github.com/ros/robot_state_publisher/pull/169
-            {'robot_description': Command([
-                'xacro ', xacro_path,
-            ])}
+            robot_description,
         ]
     )
 
-    gz_spawn_entity = Node(
-        package="ros_gz_sim",
-        executable="create",
-        arguments=[
-            "-topic", "/robot_description",
-            "-name", "road100",
-            "-allow_renaming", "true",
-            "-x", "0.0",
-            "-y", "0.0",
-            "-z", "0.1",
-            "-Y", "0.0",
-        ]
+    transform_publisher = Node(
+        package="tf2_ros",
+        executable="static_transform_publisher",
+        arguments = ["--x", "0.0",
+                    "--y", "0.0",
+                    "--z", "0.0",
+                    "--yaw", "0.0",
+                    "--pitch", "0.0",
+                    "--roll", "0.0",
+                    "--frame-id", "camera_link",
+                    "--child-frame-id", "road100/base_footprint/camera"]
     )
 
     return LaunchDescription([
         # Nodes and Launches
         robot_state_publisher,
-        # gz_spawn_entity,
+        transform_publisher,
     ])

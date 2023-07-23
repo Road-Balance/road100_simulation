@@ -37,7 +37,7 @@ def generate_launch_description():
     pkg_ros_gz_sim_demos = get_package_share_directory('ros_gz_sim_demos')
     
     pkg_path = get_package_share_directory('road100_ignition')
-    rviz_config_file = os.path.join(pkg_path, 'rviz', 'ignition.rviz')
+    rviz_config_file = os.path.join(pkg_path, 'rviz', 'ignition_view.rviz')
 
     # launch configuration
     use_rviz = LaunchConfiguration('use_rviz')
@@ -96,12 +96,13 @@ def generate_launch_description():
             "/tf@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V",
             "/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan",
             "/camera@sensor_msgs/msg/Image[gz.msgs.Image",
+            "/camera/points@sensor_msgs/msg/PointCloud2[ignition.msgs.PointCloudPacked",
             "/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo",
             "/imu@sensor_msgs/msg/Imu[gz.msgs.IMU",
-            "/world/default/model/road100/joint_state@sensor_msgs/msg/JointState[gz.msgs.Model"
+            "/world/lab/model/road100/joint_state@sensor_msgs/msg/JointState[gz.msgs.Model"
         ],
         remappings=[
-            ('/world/default/model/road100/joint_state', 'road100/joint_states'),
+            ('/world/lab/model/road100/joint_state', 'joint_states'),
         ]
     )
 
