@@ -13,14 +13,32 @@ sudo apt install libpyside2-dev python3-opengl cmake libglu1-mesa-dev freeglut3-
 cd USD
 sudo python3 build_scripts/build_usd.py --build-variant release --no-tests --no-examples --no-tutorials --no-docs --no-python /usr/local/USD
 
-std::size_t old = count;
+```
+Success! To use USD, please ensure that you have:
 
-gedit ~/.basrhc 
+    The following in your PATH environment variable:
+    /usr/local/USD/bin
+```
+
+
+gedit ~/.bashrc 
 
 export PATH=/usr/local/USD/bin:$PATH
 export LD_LIBRARY_PATH=/usr/local/USD/lib:$LD_LIBRARY_PATH
 export CMAKE_PREFIX_PATH=/usr/local/USD:$CMAKE_PREFIX_PATH
 
+alias sdf2usd="/home/kimsooyoung/Downloads/gz-usd/build/bin/sdf2usd"
 
 https://github.com/rnanosaur/nanosaur_simulations/blob/9e774d4a90ff18d764b3924d8c6ce208721718fc/nanosaur_isaac_sim/scripts/usdconverter.sh
-SDF_PATH="nanosaur_worlds/models" IGN_FILE_PATH="nanosaur_worlds/models" sdf2usd nanosaur_worlds/worlds/office.sdf office.usda
+
+cd /home/kimsooyoung/Downloads/nanosaur_simulations
+
+export SDF_PATH=/home/kimsooyoung/Downloads/nanosaur_simulations/nanosaur_worlds/models
+export IGN_FILE_PATH=/home/kimsooyoung/Downloads/nanosaur_simulations/nanosaur_worlds/models 
+
+Cache (i.e. $HOME/.ignition/fuel)
+
+SDF_PATH="/home/kimsooyoung/Downloads/nanosaur_simulations/nanosaur_worlds/models" \
+IGN_FILE_PATH="/home/kimsooyoung/Downloads/nanosaur_simulations/nanosaur_worlds/models" \
+ sdf2usd /home/kimsooyoung/Downloads/nanosaur_simulations/nanosaur_worlds/worlds/office.sdf office.usda
+
