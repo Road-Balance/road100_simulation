@@ -24,7 +24,7 @@ from ament_index_python.packages import get_package_share_directory
 
 def generate_launch_description():
     
-    pkg_path = os.path.join(get_package_share_directory("bcr_bot_slam"))
+    pkg_path = os.path.join(get_package_share_directory("road100_slam"))
 
     # launch configuration
     open_rviz = LaunchConfiguration('open_rviz')
