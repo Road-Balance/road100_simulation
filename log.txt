@@ -26,8 +26,7 @@ gedit ~/.bashrc
 export PATH=/usr/local/USD/bin:$PATH
 export LD_LIBRARY_PATH=/usr/local/USD/lib:$LD_LIBRARY_PATH
 export CMAKE_PREFIX_PATH=/usr/local/USD:$CMAKE_PREFIX_PATH
-
-alias sdf2usd="/home/kimsooyoung/Downloads/gz-usd/build/bin/sdf2usd"
+export alias sdf2usd="/home/kimsooyoung/Downloads/gz-usd/build/bin/sdf2usd"
 
 https://github.com/rnanosaur/nanosaur_simulations/blob/9e774d4a90ff18d764b3924d8c6ce208721718fc/nanosaur_isaac_sim/scripts/usdconverter.sh
 

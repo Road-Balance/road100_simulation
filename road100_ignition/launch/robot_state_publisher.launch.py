@@ -35,7 +35,7 @@ def generate_launch_description():
     pkg_path = get_package_share_directory('road100_ignition')
     xacro_path = os.path.join(pkg_path, "urdf", "road100.urdf.xacro")
 
-    use_rgbd = False
+    use_rgbd = True
 
     if use_rgbd:
         robot_description = {'robot_description': Command([

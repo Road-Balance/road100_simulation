@@ -226,7 +226,7 @@ def generate_launch_description():
                 parameters=[configured_params],
                 remappings=remappings),
             ComposableNode(
-                package='nav2_waypoint_follower',
+                package='nav2_waypoint_follower',   
                 plugin='nav2_waypoint_follower::WaypointFollower',
                 name='waypoint_follower',
                 parameters=[configured_params],

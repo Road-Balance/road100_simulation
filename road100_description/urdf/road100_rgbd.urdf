@@ -35,6 +35,9 @@
       <geometry>
         <mesh filename="package://road100_description/meshes/left_wheel_set.stl" scale="0.001 0.001 0.001"/>
       </geometry>
+      <material name="gray">
+        <color rgba="0.8 0.8 0.8 0.9"/>
+      </material>
     </visual>
   </link>
 
@@ -50,6 +53,9 @@
       <geometry>
         <mesh filename="package://road100_description/meshes/right_wheel_set.stl" scale="0.001 0.001 0.001"/>
       </geometry>
+      <material name="gray">
+        <color rgba="0.8 0.8 0.8 0.9"/>
+      </material>
     </visual>
   </link>
 
