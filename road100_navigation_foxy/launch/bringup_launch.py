@@ -32,11 +32,11 @@ def generate_launch_description():
     my_nav_dir = get_package_share_directory('road100_navigation_foxy')
     my_launch_dir = os.path.join(my_nav_dir, 'launch')
     
-    my_param_dir = os.path.join(my_nav_dir, 'param')
-    my_param_file = 'regulated_pure_pursuit_caffee.yaml'
+    my_param_dir = os.path.join(my_nav_dir, 'params')
+    my_param_file = 'dwb.yaml'
     my_bt_file = 'navigate_w_replanning_and_recovery.xml'
 
-    my_map_dir = os.path.join(my_nav_dir, 'map')
+    my_map_dir = os.path.join(my_nav_dir, 'maps')
     my_map_file = 'lab_map.yaml'
 
     rviz_config = os.path.join(my_nav_dir, 'rviz', 'nav2_default_view.rviz')
