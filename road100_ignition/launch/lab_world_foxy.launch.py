@@ -1,0 +1,142 @@
+# Copyright 2023 Road Balance
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# TODO
+# https://github.com/gazebosim/ros_gz/tree/galactic
+
+import os
+
+from pathlib import Path
+
+from ament_index_python.packages import get_package_share_directory
+
+from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument
+from launch.actions import IncludeLaunchDescription, SetEnvironmentVariable
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import Command, FindExecutable, LaunchConfiguration, PathJoinSubstitution
+from launch.conditions import IfCondition, UnlessCondition
+
+from launch_ros.actions import Node
+from launch_ros.substitutions import FindPackageShare
+
+import xacro
+
+def generate_launch_description():
+
+    # Package Directories
+    pkg_ros_gz_sim = get_package_share_directory('ros_ign_gazebo')
+    pkg_ros_gz_sim_demos = get_package_share_directory('ros_ign_gazebo_demos')
+    
+    pkg_path = get_package_share_directory('road100_ignition')
+    rviz_config_file = os.path.join(pkg_path, 'rviz', 'ignition_view.rviz')
+
+    # launch configuration
+    use_rviz = LaunchConfiguration('use_rviz')
+
+    declare_use_rviz = DeclareLaunchArgument(
+        name='use_rviz',
+        default_value='True',
+        description='Whether to start RVIZ')
+
+    # Set ignition resource path
+    ign_resource_path = SetEnvironmentVariable(
+        name='IGN_GAZEBO_RESOURCE_PATH',
+        value=[
+            os.path.join(pkg_path, 'models'), ':' +
+            os.path.join(pkg_path, 'worlds'), ':'
+        ]
+    )
+
+    # Gazebo Sim
+    gazebo = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(pkg_ros_gz_sim, 'launch', 'ign_gazebo.launch.py')
+        ),
+        launch_arguments={'ign_args': '-r lab.sdf'}.items(),
+    )
+
+    # Get URDF via xacro
+    rsp_launcher = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            os.path.join(pkg_path, 'launch', 'robot_state_publisher.launch.py')
+        ),
+    )
+
+    gz_spawn_entity = Node(
+        package="ros_ign_gazebo",
+        executable="create",
+        arguments=[
+            "-topic", "/robot_description",
+            "-name", "road100",
+            "-allow_renaming", "true",
+            "-x", "0.0",
+            "-y", "0.0",
+            "-z", "0.1",
+            "-Y", "0.0",
+        ]
+    )
+
+    # Gz - ROS Bridge
+    gz_ros2_bridge = Node(
+        package="ros_ign_bridge",
+        executable="parameter_bridge",
+        arguments=[
+            "/cmd_vel@geometry_msgs/msg/Twist@ignition.msgs.Twist",
+            "/clock@rosgraph_msgs/msg/Clock[ignition.msgs.Clock",
+            "/odom@nav_msgs/msg/Odometry[ignition.msgs.Odometry",
+            "/tf@tf2_msgs/msg/TFMessage[ignition.msgs.Pose_V",
+            "/scan@sensor_msgs/msg/LaserScan[ignition.msgs.LaserScan",
+            "/camera@sensor_msgs/msg/Image[ignition.msgs.Image",
+            "/camera/points@sensor_msgs/msg/PointCloud2[ignitionition.msgs.PointCloudPacked",
+            "/camera_info@sensor_msgs/msg/CameraInfo[ignition.msgs.CameraInfo",
+            "/imu@sensor_msgs/msg/Imu[ignition.msgs.IMU",
+            "/world/lab/model/road100/joint_state@sensor_msgs/msg/JointState[ignition.msgs.Model"
+        ],
+        remappings=[
+            ('/world/lab/model/road100/joint_state', 'joint_states'),
+        ]
+    )
+
+    # rqt robot steering
+    rqt_robot_steering = Node(
+        package='rqt_robot_steering',
+        executable='rqt_robot_steering',
+        name='rqt_robot_steering',
+        output='screen'
+    )
+
+    # Launch RViz
+    rviz = Node(
+        condition=IfCondition(use_rviz),
+        package='rviz2',
+        executable='rviz2',
+        name='rviz2',
+        output='screen',
+        arguments=['-d', rviz_config_file]
+    )
+
+    return LaunchDescription([
+        # Launch Configuration 
+        declare_use_rviz,
+
+        # Nodes and Launches
+        ign_resource_path,
+        gazebo,
+        rsp_launcher,
+        gz_spawn_entity,
+        gz_ros2_bridge,
+        rqt_robot_steering,
+        rviz,
+    ])
